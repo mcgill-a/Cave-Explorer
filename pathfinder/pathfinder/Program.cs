@@ -112,6 +112,39 @@ namespace pathfinder
             Console.WriteLine(strCoords);
 
 
+            // print out cavern x connectivity
+            int connectivityStart = numOfCoordinateValues +1;
+
+            string connectivityMatrixRow = "";
+            int count = 0;
+            int rows = 0;
+
+            Console.WriteLine("\nCavern Connectivity Matrix:\n");
+            for (int i = 0; i < numOfConnectivity; i++)
+            {
+                if (rows < numOfCaverns)
+                {
+                    if (count < numOfCaverns)
+                    {
+                        connectivityMatrixRow += values[connectivityStart + i] + " ";
+                        if (count == numOfCaverns - 1)
+                        {
+                            Console.WriteLine(connectivityMatrixRow);
+                            rows++;
+                        }
+                        count++;
+                    }
+                    else
+                    {
+                        connectivityMatrixRow = values[connectivityStart + i] + " ";
+                        count = 1;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
         }
     }
 }
