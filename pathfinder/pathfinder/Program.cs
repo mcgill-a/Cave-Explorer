@@ -13,7 +13,6 @@ namespace pathfinder
         {
             Boolean valid = false;
             string filename = "";
-            Console.WriteLine("App Loaded");
             if (args.Length < 1)
             {
                 Console.WriteLine("No arguments added. File set to 'input1.cav'");
@@ -112,12 +111,16 @@ namespace pathfinder
             Console.WriteLine(strCoords);
 
 
-            // print out cavern x connectivity
+            // Read connectivity matrix
             int connectivityStart = numOfCoordinateValues +1;
 
             string connectivityMatrixRow = "";
             int count = 0;
             int rows = 0;
+
+            //Create dictionary to store caverns and their connectivity
+            Dictionary<int, List<int>> caverns = new Dictionary<int, List<int>>();
+            List<int> connectivity = new List<int>();
 
             Console.WriteLine("\nCavern Connectivity Matrix:\n");
             for (int i = 0; i < numOfConnectivity; i++)
@@ -127,22 +130,46 @@ namespace pathfinder
                     if (count < numOfCaverns)
                     {
                         connectivityMatrixRow += values[connectivityStart + i] + " ";
+                        connectivity.Add(values[connectivityStart + i]);
                         if (count == numOfCaverns - 1)
                         {
-                            Console.WriteLine(connectivityMatrixRow);
+                            //Console.WriteLine(connectivityMatrixRow);
                             rows++;
+                            caverns.Add(rows, connectivity);
                         }
                         count++;
                     }
                     else
                     {
+                        connectivity = new List<int>();
                         connectivityMatrixRow = values[connectivityStart + i] + " ";
                         count = 1;
+                        connectivity.Add(values[connectivityStart + i]);
                     }
                 }
                 else
                 {
                     break;
+                }
+            }
+
+            // Print connectivity matrix using the dictionary key values
+            int counter = 0;
+            foreach (var item in caverns.Values)
+            {
+                string line = "";
+                for (int i = 0; i < item.Count; i++)
+                {
+                    line += item[i] + " ";
+                }
+                counter++;
+                if (counter < 10)
+                {
+                    Console.WriteLine("0" + counter + " >> " + line);
+                }
+                else
+                {
+                    Console.WriteLine(counter + " >> " + line);
                 }
             }
         }
