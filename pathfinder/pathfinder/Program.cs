@@ -16,19 +16,21 @@ namespace pathfinder
             Console.WriteLine("App Loaded");
             if (args.Length < 1)
             {
-                Console.WriteLine("No arguments added");
+                Console.WriteLine("No arguments added. File set to 'input1.cav'");
+                filename = "input1.cav";
             }
             else
             {
                 filename = args[0];
-                filename = EnsureExtension(filename);
-                valid = CheckFileExists(filename);
             }
+
+            filename = EnsureExtension(filename);
+            valid = CheckFileExists(filename);
 
             if (valid)
             {
                 Console.WriteLine("File '" + filename + "' exists");
-                LoadFile(filename);
+                ProcessData(LoadFile(filename));
             }
             else
             {
@@ -58,7 +60,7 @@ namespace pathfinder
             }
         }
 
-        public static void LoadFile(string filename)
+        public static List<int> LoadFile(string filename)
         {
             List<string> values;
             string readContent;
@@ -68,8 +70,48 @@ namespace pathfinder
             }
 
             values = new List<string>(readContent.Split(','));
+            List <int> intValues = values.ConvertAll(int.Parse);
+            return intValues;
+        }
 
-            Console.WriteLine("File Length: " + values.Count + " values");
+        public static void ProcessData(List<int> values)
+        {
+            int numOfCaverns = 0;
+            int numOfCoordinateValues = 0;
+            int numOfConnectivity = 0;
+            
+            if (values.Count > 0)
+            {
+                numOfCaverns = values[0];
+                numOfCoordinateValues = numOfCaverns * 2;
+                numOfConnectivity = numOfCaverns * numOfCaverns;
+            }
+            Console.WriteLine("Caverns: " + numOfCaverns + " | Coordinates: " + numOfCoordinateValues / 2 + " | Connectivity: " + numOfConnectivity);
+
+            // First cavern is always start point
+            // Last cavern is always end point
+            int cavernStart = 1;
+            int cavernEnd = numOfCaverns;
+            Console.WriteLine("Start Cavern: " + cavernStart + " | End Cavern: " + cavernEnd);
+            
+            // Get all of the cavern coordinates
+            var coordinates = new List<Tuple<int, int>>();
+            for (int i = 0; i < numOfCoordinateValues; i++)
+            {
+                var coordinate = new Tuple<int, int>(values[i + 1], values[i + 2]);
+                coordinates.Add(coordinate);
+                i++;
+            }
+
+            // Print all of the cavern coordinates
+            string strCoords = "";
+            foreach (Tuple<int, int> coordinate in coordinates)
+            {
+                strCoords += coordinate.ToString() + " ";
+            }
+            Console.WriteLine(strCoords);
+
+
         }
     }
 }
