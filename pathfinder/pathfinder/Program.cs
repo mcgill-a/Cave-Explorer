@@ -172,6 +172,54 @@ namespace pathfinder
                     Console.WriteLine(counter + " >> " + line);
                 }
             }
+
+            Console.WriteLine("");
+
+            Dictionary<int, List<int>> openList = new Dictionary<int, List<int>>();
+
+            // For testing purposes
+            int currentCavern = 3;
+
+            openList.Add(currentCavern, caverns[currentCavern]);
+
+            List<int> closedList = new List<int>();
+            bool connectionFound = false;
+            while(openList.Count > 0)
+            {
+                // get the lowest scoring node in openlist (calculate distance between start point and valid points)
+                int lowestCavern = 0;
+                double lowestDistance = double.MaxValue;
+                double distance = 0;
+                //List<int> current = openList[1];
+                for (int i = 0; i < caverns[1].Count; i++)
+                {
+                    Tuple<int, int> start = coordinates[currentCavern - 1];
+                    if (caverns[currentCavern][i].Equals(1))
+                    {
+                        connectionFound = true;
+                        Tuple<int, int> destination = coordinates[i];
+                        distance = CalculateDistance(start, destination);
+                        Console.WriteLine("Distance between: " + start.ToString() + " and " + destination.ToString() + " : " + distance);
+
+                        if (distance < lowestDistance)
+                        {
+                            lowestDistance = distance;
+                            lowestCavern = i +1;
+                        }
+                    }
+                }
+                if (connectionFound)
+                {
+                    Console.WriteLine("\nClosest Cavern (" + currentCavern + "): " + (lowestCavern) + " | Distance: " + lowestDistance);
+                }
+                openList.Remove(currentCavern);
+            }
+        }
+
+        public static double CalculateDistance(Tuple<int, int> one, Tuple<int, int> two)
+        {
+            double distance = Math.Sqrt(Math.Pow((two.Item1 - one.Item1), 2) + Math.Pow((two.Item2 - one.Item2), 2));
+            return distance;
         }
     }
 }
