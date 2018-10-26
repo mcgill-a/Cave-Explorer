@@ -16,7 +16,7 @@ namespace pathfinder
             string output = "";
             if (args.Length < 1)
             {
-                Console.WriteLine("No arguments added. File set to 'input1.cav'");
+                //Console.WriteLine("No arguments added. File set to 'input1.cav'");
                 filename = "input1.cav";
             }
             else
@@ -29,15 +29,14 @@ namespace pathfinder
 
             if (valid)
             {
-                Console.WriteLine("File '" + filename + "' exists");
+                //Console.WriteLine("File '" + filename + "' exists");
                 output = ProcessData(LoadFile(filename));
                 WriteResultToFile(filename, output);
             }
             else
             {
-                Console.WriteLine("Please enter a valid file name");
+                //Console.WriteLine("Please enter a valid file name");
             }
-            Console.ReadLine();
         }
 
         public static String EnsureExtension(string name)
@@ -77,23 +76,23 @@ namespace pathfinder
 
         public static void WriteResultToFile(string filenameOriginal, string output)
         {
-            string filenameOutputNoExt = RemoveExtension(filenameOriginal) + "_output";
-            string filenameOutput = filenameOutputNoExt + ".cav";
+            string filenameOutputNoExt = RemoveExtension(filenameOriginal);
+            string filenameOutput = filenameOutputNoExt + ".csn";
 
             bool existsAlready = CheckFileExists(filenameOutput);
 
-            int count = 0;
-            // Add counter to file if it already exists: input1 (1).cav, input1 (2).cav
+            int count = 1;
+            // Add counter to file if it already exists: input1 (2).cav, input1 (3).cav
             while(existsAlready)
             {
                 count++;
-                if (count > 1)
+                if (count > 2)
                 {
                     filenameOutputNoExt = filenameOutputNoExt.Substring(0, filenameOutputNoExt.Length - 4);
                 }
                 filenameOutputNoExt += " (" + count + ")";
 
-                filenameOutput = filenameOutputNoExt + ".cav";
+                filenameOutput = filenameOutputNoExt + ".csn";
                 existsAlready = CheckFileExists(filenameOutput);
             }
 
@@ -117,13 +116,13 @@ namespace pathfinder
                 numOfCoordinateValues = numOfCaverns * 2;
                 numOfConnectivity = numOfCaverns * numOfCaverns;
             }
-            Console.WriteLine("Caverns: " + numOfCaverns + " | Coordinates: " + numOfCoordinateValues / 2 + " | Connectivity: " + numOfConnectivity);
+            //Console.WriteLine("Caverns: " + numOfCaverns + " | Coordinates: " + numOfCoordinateValues / 2 + " | Connectivity: " + numOfConnectivity);
 
             // First cavern is always start point
             // Last cavern is always end point
             int cavernStart = 1;
             int cavernEnd = numOfCaverns;
-            Console.WriteLine("Start Cavern: " + cavernStart + " | End Cavern: " + cavernEnd);
+            //Console.WriteLine("Start Cavern: " + cavernStart + " | End Cavern: " + cavernEnd);
 
             // Get all of the cavern coordinates
             var coordinates = new List<Tuple<int, int>>();
@@ -140,7 +139,7 @@ namespace pathfinder
             {
                 strCoords += coordinate.ToString() + " ";
             }
-            Console.WriteLine(strCoords);
+            //Console.WriteLine(strCoords);
 
 
             // Read connectivity matrix
@@ -154,7 +153,7 @@ namespace pathfinder
             Dictionary<int, List<int>> caverns = new Dictionary<int, List<int>>();
             List<int> connectivity = new List<int>();
 
-            Console.WriteLine("\nCavern Connectivity Matrix:\n");
+            //Console.WriteLine("\nCavern Connectivity Matrix:\n");
             for (int i = 0; i < numOfConnectivity; i++)
             {
                 if (rows < numOfCaverns)
@@ -196,11 +195,11 @@ namespace pathfinder
                 counter++;
                 if (counter < 10)
                 {
-                    Console.WriteLine("0" + counter + " >> " + line);
+                    //Console.WriteLine("0" + counter + " >> " + line);
                 }
                 else
                 {
-                    Console.WriteLine(counter + " >> " + line);
+                    //Console.WriteLine(counter + " >> " + line);
                 }
             }
 
@@ -302,7 +301,7 @@ namespace pathfinder
                 output = "0";
             }
 
-            Console.WriteLine("\nResult: " + output);
+            //Console.WriteLine("\nResult: " + output);
 
             return output;
         }
