@@ -179,7 +179,7 @@ namespace pathfinder
             var openList = new List<Cavern>();
             var closedList = new List<Cavern>();
             double g = 0;
-
+            bool found = false;
             openList.Add(start);
             
             while (openList.Count > 0)
@@ -197,6 +197,7 @@ namespace pathfinder
                 // If the destination is added to the closed list, a path is found
                 if (closedList.FirstOrDefault(l => l.ID == end.ID) != null)
                 {
+                    found = true;
                     break;
                 }
 
@@ -254,12 +255,20 @@ namespace pathfinder
             }
 
             string output = "";
-            for (int i = cavernHistory.Count - 1; i >= 0; i--)
-            {
-                output += cavernHistory[i].ID + " ";
-            }
 
-            Console.WriteLine("\nResult: " + output);
+            if (found)
+            {
+                for (int i = cavernHistory.Count - 1; i >= 0; i--)
+                {
+                    output += cavernHistory[i].ID + " ";
+                }
+
+                Console.WriteLine("\nResult: " + output);
+            }
+            else
+            {
+                Console.WriteLine("\nResult: 0");
+            }
 
             Console.ReadLine();
         }
