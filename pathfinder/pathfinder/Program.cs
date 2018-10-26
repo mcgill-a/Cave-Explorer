@@ -78,7 +78,7 @@ namespace pathfinder
             int numOfCaverns = 0;
             int numOfCoordinateValues = 0;
             int numOfConnectivity = 0;
-            
+
             if (values.Count > 0)
             {
                 numOfCaverns = values[0];
@@ -92,7 +92,7 @@ namespace pathfinder
             int cavernStart = 1;
             int cavernEnd = numOfCaverns;
             Console.WriteLine("Start Cavern: " + cavernStart + " | End Cavern: " + cavernEnd);
-            
+
             // Get all of the cavern coordinates
             var coordinates = new List<Tuple<int, int>>();
             for (int i = 0; i < numOfCoordinateValues; i++)
@@ -112,7 +112,7 @@ namespace pathfinder
 
 
             // Read connectivity matrix
-            int connectivityStart = numOfCoordinateValues +1;
+            int connectivityStart = numOfCoordinateValues + 1;
 
             string connectivityMatrixRow = "";
             int count = 0;
@@ -133,7 +133,6 @@ namespace pathfinder
                         connectivity.Add(values[connectivityStart + i]);
                         if (count == numOfCaverns - 1)
                         {
-                            //Console.WriteLine(connectivityMatrixRow);
                             rows++;
                             caverns.Add(rows, connectivity);
                         }
@@ -173,53 +172,114 @@ namespace pathfinder
                 }
             }
 
-            Console.WriteLine("");
+            // Setup variables for A* Search
+            Cavern current = null;
+            var start = new Cavern { ID = 1, Connectivity = caverns[1], Coordinates = coordinates[0] };
+            var end = new Cavern { ID = numOfCaverns, Connectivity = caverns[numOfCaverns], Coordinates = coordinates[numOfCaverns - 1] };
+            var openList = new List<Cavern>();
+            var closedList = new List<Cavern>();
+            double g = 0;
 
-            Dictionary<int, List<int>> openList = new Dictionary<int, List<int>>();
-
-            // For testing purposes
-            int currentCavern = 3;
-
-            openList.Add(currentCavern, caverns[currentCavern]);
-
-            List<int> closedList = new List<int>();
-            bool connectionFound = false;
-            while(openList.Count > 0)
+            openList.Add(start);
+            
+            while (openList.Count > 0)
             {
-                // get the lowest scoring node in openlist (calculate distance between start point and valid points)
-                int lowestCavern = 0;
-                double lowestDistance = double.MaxValue;
-                double distance = 0;
-                //List<int> current = openList[1];
-                for (int i = 0; i < caverns[1].Count; i++)
-                {
-                    Tuple<int, int> start = coordinates[currentCavern - 1];
-                    if (caverns[currentCavern][i].Equals(1))
-                    {
-                        connectionFound = true;
-                        Tuple<int, int> destination = coordinates[i];
-                        distance = CalculateDistance(start, destination);
-                        Console.WriteLine("Distance between: " + start.ToString() + " and " + destination.ToString() + " : " + distance);
+                // Get the cavern with the lowest F score
+                var lowest = openList.Min(l => l.F);
+                current = openList.First(l => l.F == lowest);
 
-                        if (distance < lowestDistance)
+                // Add the current cavern to the closed list
+                closedList.Add(current);
+
+                // Remove it from the open list
+                openList.Remove(current);
+
+                // If the destination is added to the closed list, a path is found
+                if (closedList.FirstOrDefault(l => l.ID == end.ID) != null)
+                {
+                    break;
+                }
+
+                List<int> connected = new List<int>();
+                for (int i = 0; i < current.Connectivity.Count; i++)
+                {
+                    if (current.Connectivity[i] == 1)
+                    {
+                        // Cavern names start at 1 not 0 so add 1
+                        connected.Add(i+1);
+                    }
+                }
+
+                var connections = GetConnectedCaverns(connected, coordinates, caverns);
+
+                foreach(var cavern in connections)
+                {
+                    g = current.G + CalculateDistance(current.Coordinates, cavern.Coordinates);
+                    // If the neighbour id is already on the closed list then ignore it
+                    if (closedList.FirstOrDefault(l => l.ID == cavern.ID) != null)
+                    {
+                        continue;
+                    }
+
+                    // If the neighbour id is not in on the open list
+                    if (openList.FirstOrDefault(l => l.ID == cavern.ID) == null)
+                    {
+                        // Calculate scores & set parent cavern
+                        cavern.G = g;
+                        cavern.H = CalculateDistance(cavern.Coordinates, end.Coordinates);
+                        cavern.F = cavern.G + cavern.H;
+                        cavern.Parent = current;
+
+                        // Add it to the open list
+                        openList.Insert(0, cavern);
+                    }
+                    else
+                    {
+                        // Check if using the current G score makes the cavern F score lower
+                        // If it is quicker change the parent to current
+                        if (g + cavern.H < cavern.F)
                         {
-                            lowestDistance = distance;
-                            lowestCavern = i +1;
+                            cavern.G = g;
+                            cavern.F = cavern.G + cavern.H;
+                            cavern.Parent = current;
                         }
                     }
                 }
-                if (connectionFound)
-                {
-                    Console.WriteLine("\nClosest Cavern (" + currentCavern + "): " + (lowestCavern) + " | Distance: " + lowestDistance);
-                }
-                openList.Remove(currentCavern);
             }
+            List<Cavern> cavernHistory = new List<Cavern>();
+            while (current != null)
+            {
+                cavernHistory.Add(current);
+                current = current.Parent;
+            }
+
+            string output = "";
+            for (int i = cavernHistory.Count - 1; i >= 0; i--)
+            {
+                output += cavernHistory[i].ID + " ";
+            }
+
+            Console.WriteLine("\nResult: " + output);
+
+            Console.ReadLine();
+        }
+
+        public static List<Cavern> GetConnectedCaverns(List<int> connectedCavernIDs, List<Tuple<int, int>> coords, Dictionary<int, List<int>> connections)
+        {
+            var connected = new List<Cavern>();
+            for (int i = 0; i < connectedCavernIDs.Count; i++)
+            {
+                int id = connectedCavernIDs[i];
+                Cavern toAdd = new Cavern { ID = id, Coordinates = coords[id-1], Connectivity = connections[id] };
+                connected.Add(toAdd);
+            }
+
+            return connected;
         }
 
         public static double CalculateDistance(Tuple<int, int> one, Tuple<int, int> two)
         {
-            double distance = Math.Sqrt(Math.Pow((two.Item1 - one.Item1), 2) + Math.Pow((two.Item2 - one.Item2), 2));
-            return distance;
+            return Math.Sqrt(Math.Pow((two.Item1 - one.Item1), 2) + Math.Pow((two.Item2 - one.Item2), 2));
         }
     }
 }
