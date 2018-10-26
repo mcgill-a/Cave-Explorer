@@ -13,6 +13,7 @@ namespace pathfinder
         {
             Boolean valid = false;
             string filename = "";
+            string output = "";
             if (args.Length < 1)
             {
                 Console.WriteLine("No arguments added. File set to 'input1.cav'");
@@ -29,7 +30,8 @@ namespace pathfinder
             if (valid)
             {
                 Console.WriteLine("File '" + filename + "' exists");
-                ProcessData(LoadFile(filename));
+                output = ProcessData(LoadFile(filename));
+                WriteResultToFile(filename, output);
             }
             else
             {
@@ -73,7 +75,37 @@ namespace pathfinder
             return intValues;
         }
 
-        public static void ProcessData(List<int> values)
+        public static void WriteResultToFile(string filenameOriginal, string output)
+        {
+            string filenameOutputNoExt = RemoveExtension(filenameOriginal) + "_output";
+            string filenameOutput = filenameOutputNoExt + ".cav";
+
+            bool existsAlready = CheckFileExists(filenameOutput);
+
+            int count = 0;
+            // Add counter to file if it already exists: input1 (1).cav, input1 (2).cav
+            while(existsAlready)
+            {
+                count++;
+                if (count > 1)
+                {
+                    filenameOutputNoExt = filenameOutputNoExt.Substring(0, filenameOutputNoExt.Length - 4);
+                }
+                filenameOutputNoExt += " (" + count + ")";
+
+                filenameOutput = filenameOutputNoExt + ".cav";
+                existsAlready = CheckFileExists(filenameOutput);
+            }
+
+            File.WriteAllText(filenameOutput, output);
+        }
+
+        public static string RemoveExtension(string input)
+        {
+            return Path.GetFileNameWithoutExtension(input);
+        }
+
+        public static string ProcessData(List<int> values)
         {
             int numOfCaverns = 0;
             int numOfCoordinateValues = 0;
@@ -247,30 +279,32 @@ namespace pathfinder
                     }
                 }
             }
-            List<Cavern> cavernHistory = new List<Cavern>();
-            while (current != null)
-            {
-                cavernHistory.Add(current);
-                current = current.Parent;
-            }
 
             string output = "";
 
             if (found)
             {
+                // Follow the chain backwards to display result
+                List<Cavern> cavernHistory = new List<Cavern>();
+                while (current != null)
+                {
+                    cavernHistory.Add(current);
+                    current = current.Parent;
+                }
+
                 for (int i = cavernHistory.Count - 1; i >= 0; i--)
                 {
                     output += cavernHistory[i].ID + " ";
                 }
-
-                Console.WriteLine("\nResult: " + output);
             }
             else
             {
-                Console.WriteLine("\nResult: 0");
+                output = "0";
             }
 
-            Console.ReadLine();
+            Console.WriteLine("\nResult: " + output);
+
+            return output;
         }
 
         public static List<Cavern> GetConnectedCaverns(List<int> connectedCavernIDs, List<Tuple<int, int>> coords, Dictionary<int, List<int>> connections)
