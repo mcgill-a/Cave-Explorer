@@ -3,7 +3,6 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace pathfinder
 {
@@ -16,8 +15,8 @@ namespace pathfinder
             string output = "";
             if (args.Length < 1)
             {
-                //Console.WriteLine("No arguments added. File set to 'input1.cav'");
-                filename = "input1.cav";
+                //Console.WriteLine("No arguments added. Default file set'");
+                filename = "generated1000-1";
             }
             else
             {
@@ -118,11 +117,7 @@ namespace pathfinder
             }
             //Console.WriteLine("Caverns: " + numOfCaverns + " | Coordinates: " + numOfCoordinateValues / 2 + " | Connectivity: " + numOfConnectivity);
 
-            // First cavern is always start point
-            // Last cavern is always end point
-            int cavernStart = 1;
-            int cavernEnd = numOfCaverns;
-            //Console.WriteLine("Start Cavern: " + cavernStart + " | End Cavern: " + cavernEnd);
+            //Console.WriteLine("Start Cavern: " + cavernStart + " | End Cavern: " + numOfCaverns);
 
             // Get all of the cavern coordinates
             var coordinates = new List<Tuple<int, int>>();
@@ -133,6 +128,7 @@ namespace pathfinder
                 i++;
             }
 
+            /*
             // Print all of the cavern coordinates
             string strCoords = "";
             foreach (Tuple<int, int> coordinate in coordinates)
@@ -140,7 +136,7 @@ namespace pathfinder
                 strCoords += coordinate.ToString() + " ";
             }
             //Console.WriteLine(strCoords);
-
+            */
 
             // Read connectivity matrix
             int connectivityStart = numOfCoordinateValues + 1;
@@ -183,6 +179,7 @@ namespace pathfinder
                 }
             }
 
+            /*
             // Print connectivity matrix using the dictionary key values
             int counter = 0;
             foreach (var item in caverns.Values)
@@ -202,13 +199,14 @@ namespace pathfinder
                     //Console.WriteLine(counter + " >> " + line);
                 }
             }
+            */
 
             // Setup variables for A* Search
             Cavern current = null;
-            var start = new Cavern { ID = 1, Connectivity = caverns[1], Coordinates = coordinates[0] };
-            var end = new Cavern { ID = numOfCaverns, Connectivity = caverns[numOfCaverns], Coordinates = coordinates[numOfCaverns - 1] };
-            var openList = new List<Cavern>();
-            var closedList = new List<Cavern>();
+            Cavern start = new Cavern { ID = 1, Connectivity = caverns[1], Coordinates = coordinates[0] };
+            Cavern end = new Cavern { ID = numOfCaverns, Connectivity = caverns[numOfCaverns], Coordinates = coordinates[numOfCaverns - 1] };
+            List<Cavern> openList = new List<Cavern>();
+            List<Cavern> closedList = new List<Cavern>();
             double g = 0;
             bool found = false;
             openList.Add(start);
@@ -216,7 +214,7 @@ namespace pathfinder
             while (openList.Count > 0)
             {
                 // Get the cavern with the lowest F score
-                var lowest = openList.Min(l => l.F);
+                double lowest = openList.Min(l => l.F);
                 current = openList.First(l => l.F == lowest);
 
                 // Add the current cavern to the closed list
@@ -242,9 +240,9 @@ namespace pathfinder
                     }
                 }
 
-                var connections = GetConnectedCaverns(connected, coordinates, caverns);
+                List<Cavern> connections = GetConnectedCaverns(connected, coordinates, caverns);
 
-                foreach(var cavern in connections)
+                foreach(Cavern cavern in connections)
                 {
                     g = current.G + CalculateDistance(current.Coordinates, cavern.Coordinates);
                     // If the neighbour id is already on the closed list then ignore it
@@ -293,7 +291,14 @@ namespace pathfinder
 
                 for (int i = cavernHistory.Count - 1; i >= 0; i--)
                 {
-                    output += cavernHistory[i].ID + " ";
+                    if (i != 0)
+                    {
+                        output += cavernHistory[i].ID + " ";
+                    }
+                    else
+                    {
+                        output += cavernHistory[i].ID;
+                    }
                 }
             }
             else
@@ -308,7 +313,7 @@ namespace pathfinder
 
         public static List<Cavern> GetConnectedCaverns(List<int> connectedCavernIDs, List<Tuple<int, int>> coords, Dictionary<int, List<int>> connections)
         {
-            var connected = new List<Cavern>();
+            List<Cavern> connected = new List<Cavern>();
             for (int i = 0; i < connectedCavernIDs.Count; i++)
             {
                 int id = connectedCavernIDs[i];
