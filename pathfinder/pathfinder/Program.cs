@@ -17,22 +17,7 @@ namespace pathfinder
             string output = "";
             if (args.Length < 1)
             {
-                //Console.WriteLine("Usage: pathfinder.exe <filename>");
-                filename = "input2.cav";
-                //Console.WriteLine("No arguments added. Default file set to '" + filename + "'");
-                filename = EnsureExtension(filename);
-                fileExists = CheckFileExists(filename);
-                if (fileExists)
-                {
-                    //Console.WriteLine("File '" + filename + "' exists");
-                    output = ProcessData(LoadFile(filename));
-                    WriteResultToFile(filename, output);
-                }
-                else
-                {
-                    //Console.WriteLine("File does not exist");
-                    Console.WriteLine("Usage: pathfinder.exe <filename>");
-                }
+                Console.WriteLine("Usage: pathfinder.exe <filename>");
             }
             else
             {
@@ -43,13 +28,11 @@ namespace pathfinder
 
                 if (fileExists)
                 {
-                    //Console.WriteLine("File '" + filename + "' exists");
                     output = ProcessData(LoadFile(filename));
                     WriteResultToFile(filename, output);
                 }
                 else
                 {
-                    //Console.WriteLine("File does not exist");
                     Console.WriteLine("Usage: pathfinder.exe <filename>");
                 }
             }
@@ -134,8 +117,6 @@ namespace pathfinder
             }
             //Console.WriteLine("Caverns: " + numOfCaverns + " | Coordinates: " + numOfCoordinateValues / 2 + " | Connectivity: " + numOfConnectivity);
 
-            //Console.WriteLine("Start Cavern: " + cavernStart + " | End Cavern: " + numOfCaverns);
-
             // Get all of the cavern coordinates
             int id_counter = 1;
             for (int i = 0; i < numOfCoordinateValues; i++)
@@ -169,8 +150,8 @@ namespace pathfinder
 
             // Setup variables for A* Search
             Cavern current = null;
-            Cavern start = caverns.FirstOrDefault(l => l.ID == 1);
-            Cavern end = caverns.FirstOrDefault(l => l.ID == numOfCaverns);
+            Cavern start = caverns.FirstOrDefault(cav => cav.ID == 1);
+            Cavern end = caverns.FirstOrDefault(cav => cav.ID == numOfCaverns);
             List<Cavern> openList = new List<Cavern>();
             List<Cavern> closedList = new List<Cavern>();
             double g = 0;
@@ -180,8 +161,8 @@ namespace pathfinder
             while (openList.Count > 0)
             {
                 // Get the cavern with the lowest F score
-                double lowest = openList.Min(l => l.F);
-                current = openList.First(l => l.F == lowest);
+                double lowest = openList.Min(cav => cav.F);
+                current = openList.First(cav => cav.F == lowest);
 
                 // Add the current cavern to the closed list
                 closedList.Add(current);
@@ -190,7 +171,7 @@ namespace pathfinder
                 openList.Remove(current);
 
                 // If the destination is added to the closed list, a path is found
-                if (closedList.FirstOrDefault(l => l.ID == end.ID) != null)
+                if (closedList.FirstOrDefault(cav => cav.ID == end.ID) != null)
                 {
                     found = true;
                     break;
@@ -212,14 +193,14 @@ namespace pathfinder
                     //Console.WriteLine(cavern.ID);
                     g = current.G + CalculateDistance(current.Coordinates, cavern.Coordinates);
                     // If the neighbour id is already on the closed list then ignore it
-                    if (closedList.FirstOrDefault(l => l.ID == cavern.ID) != null)
+                    if (closedList.FirstOrDefault(cav => cav.ID == cavern.ID) != null)
                     {
                         //Console.WriteLine("Already explored " + cavern.ID);
                         continue;
                     }
 
                     // If the neighbour id is not in the open list
-                    if (openList.FirstOrDefault(l => l.ID == cavern.ID) == null)
+                    if (openList.FirstOrDefault(cav => cav.ID == cavern.ID) == null)
                     {
                         // Calculate scores & set parent cavern
                         cavern.G = g;
@@ -248,25 +229,13 @@ namespace pathfinder
             if (found)
             {
                 Console.WriteLine("\nPASS");
-                // Follow the chain backwards to display result
-                List<Cavern> cavernHistory = new List<Cavern>();
+                // Follow the nodes backwards to display result
                 while (current != null)
                 {
-                    cavernHistory.Add(current);
+                    output += current.ID + " ";
                     current = current.Parent;
                 }
-
-                for (int i = cavernHistory.Count - 1; i >= 0; i--)
-                {
-                    if (i != 0)
-                    {
-                        output += cavernHistory[i].ID + " ";
-                    }
-                    else
-                    {
-                        output += cavernHistory[i].ID;
-                    }
-                }
+                output = output.TrimEnd(' ');
             }
             else
             {
@@ -299,40 +268,3 @@ namespace pathfinder
         }
     }
 }
-
-/*
-    Code Graveyard:
-
-
-    // Print all of the cavern coordinates
-    string strCoords = "";
-    foreach (Tuple<int, int> coordinate in coordinates)
-    {
-        strCoords += coordinate.ToString() + " ";
-    }
-    Console.WriteLine(strCoords);
-
-    --------------------------------------------------------------------------------------
-    
-    // Print connectivity matrix using the dictionary key values
-    //Console.WriteLine("\nCavern Connectivity Matrix:\n");
-
-    int counter = 0;
-    foreach (var item in caverns.Values)
-    {
-        string line = "";
-        for (int i = 0; i < item.Count; i++)
-        {
-            line += item[i] + " ";
-        }
-        counter++;
-        if (counter < 10)
-        {
-            Console.WriteLine("0" + counter + " >> " + line);
-        }
-        else
-        {
-            Console.WriteLine(counter + " >> " + line);
-        }
-    }
-*/
