@@ -10,31 +10,33 @@ namespace pathfinder
     {
         static void Main(string[] args)
         {
-            Boolean valid = false;
+            Boolean fileExists = false;
             string filename = "";
             string output = "";
             if (args.Length < 1)
             {
-                //Console.WriteLine("No arguments added. Default file set'");
-                filename = "generated1000-1";
+                Console.WriteLine("Usage: pathfinder.exe <filename>");
+                //filename = "input2.cav";
+                //Console.WriteLine("No arguments added. Default file set to '" + filename + "'");
             }
             else
             {
                 filename = args[0];
-            }
 
-            filename = EnsureExtension(filename);
-            valid = CheckFileExists(filename);
+                filename = EnsureExtension(filename);
+                fileExists = CheckFileExists(filename);
 
-            if (valid)
-            {
-                //Console.WriteLine("File '" + filename + "' exists");
-                output = ProcessData(LoadFile(filename));
-                WriteResultToFile(filename, output);
-            }
-            else
-            {
-                //Console.WriteLine("Please enter a valid file name");
+                if (fileExists)
+                {
+                    //Console.WriteLine("File '" + filename + "' exists");
+                    output = ProcessData(LoadFile(filename));
+                    WriteResultToFile(filename, output);
+                }
+                else
+                {
+                    //Console.WriteLine("File does not exist");
+                    Console.WriteLine("Usage: pathfinder.exe <filename>");
+                }
             }
         }
 
@@ -135,52 +137,38 @@ namespace pathfinder
             {
                 strCoords += coordinate.ToString() + " ";
             }
-            //Console.WriteLine(strCoords);
+            Console.WriteLine(strCoords);
             */
-
-            // Read connectivity matrix
-            int connectivityStart = numOfCoordinateValues + 1;
-
-            string connectivityMatrixRow = "";
-            int count = 0;
-            int rows = 0;
 
             //Create dictionary to store caverns and their connectivity
             Dictionary<int, List<int>> caverns = new Dictionary<int, List<int>>();
-            List<int> connectivity = new List<int>();
 
-            //Console.WriteLine("\nCavern Connectivity Matrix:\n");
+            // Read connectivity matrix
+            int connectivityStart = numOfCoordinateValues + 1;
+            int tracker = 1;
+
             for (int i = 0; i < numOfConnectivity; i++)
             {
-                if (rows < numOfCaverns)
+                if (tracker > numOfCaverns)
                 {
-                    if (count < numOfCaverns)
-                    {
-                        connectivityMatrixRow += values[connectivityStart + i] + " ";
-                        connectivity.Add(values[connectivityStart + i]);
-                        if (count == numOfCaverns - 1)
-                        {
-                            rows++;
-                            caverns.Add(rows, connectivity);
-                        }
-                        count++;
-                    }
-                    else
-                    {
-                        connectivity = new List<int>();
-                        connectivityMatrixRow = values[connectivityStart + i] + " ";
-                        count = 1;
-                        connectivity.Add(values[connectivityStart + i]);
-                    }
+                    tracker = 1;
+                }
+                if (caverns.ContainsKey(tracker))
+                {
+                    caverns[tracker].Add(values[(connectivityStart + i)]);
                 }
                 else
                 {
-                    break;
+                    caverns[tracker] = new List<int> { values[connectivityStart + i] };
                 }
+                tracker++;
             }
 
             /*
             // Print connectivity matrix using the dictionary key values
+
+            //Console.WriteLine("\nCavern Connectivity Matrix:\n");
+
             int counter = 0;
             foreach (var item in caverns.Values)
             {
@@ -192,14 +180,15 @@ namespace pathfinder
                 counter++;
                 if (counter < 10)
                 {
-                    //Console.WriteLine("0" + counter + " >> " + line);
+                    Console.WriteLine("0" + counter + " >> " + line);
                 }
                 else
                 {
-                    //Console.WriteLine(counter + " >> " + line);
+                    Console.WriteLine(counter + " >> " + line);
                 }
             }
             */
+
 
             // Setup variables for A* Search
             Cavern current = null;
@@ -210,7 +199,6 @@ namespace pathfinder
             double g = 0;
             bool found = false;
             openList.Add(start);
-            
             while (openList.Count > 0)
             {
                 // Get the cavern with the lowest F score
@@ -239,15 +227,18 @@ namespace pathfinder
                         connected.Add(i+1);
                     }
                 }
-
+                //Console.WriteLine(current.ID + " " + current.Connectivity.Count);
+                
                 List<Cavern> connections = GetConnectedCaverns(connected, coordinates, caverns);
 
                 foreach(Cavern cavern in connections)
                 {
+                    //Console.WriteLine(cavern.ID);
                     g = current.G + CalculateDistance(current.Coordinates, cavern.Coordinates);
                     // If the neighbour id is already on the closed list then ignore it
                     if (closedList.FirstOrDefault(l => l.ID == cavern.ID) != null)
                     {
+                        //Console.WriteLine("Already explored " + cavern.ID);
                         continue;
                     }
 
@@ -259,7 +250,6 @@ namespace pathfinder
                         cavern.H = CalculateDistance(cavern.Coordinates, end.Coordinates);
                         cavern.F = cavern.G + cavern.H;
                         cavern.Parent = current;
-
                         // Add it to the open list
                         openList.Insert(0, cavern);
                     }
@@ -281,6 +271,7 @@ namespace pathfinder
 
             if (found)
             {
+                Console.WriteLine("PASS");
                 // Follow the chain backwards to display result
                 List<Cavern> cavernHistory = new List<Cavern>();
                 while (current != null)
@@ -303,11 +294,11 @@ namespace pathfinder
             }
             else
             {
+                Console.WriteLine("FAIL");
                 output = "0";
             }
 
-            //Console.WriteLine("\nResult: " + output);
-
+            //Console.WriteLine("\nResult: " + output + "\n");
             return output;
         }
 
