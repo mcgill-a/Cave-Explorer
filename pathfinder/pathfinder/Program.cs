@@ -232,7 +232,7 @@ namespace pathfinder
                 // Follow the nodes backwards to display result
                 while (current != null)
                 {
-                    output += current.ID + " ";
+                    output = current.ID + " " + output;
                     current = current.Parent;
                 }
                 output = output.TrimEnd(' ');
@@ -243,7 +243,6 @@ namespace pathfinder
                 output = "0";
             }
 
-            //Console.WriteLine("\nResult: " + output + "\n");
             return output;
         }
 
@@ -252,13 +251,10 @@ namespace pathfinder
             List<Cavern> connected = new List<Cavern>();
             for (int i = 0; i < connectedCavernIDs.Count; i++)
             {
-                int id = connectedCavernIDs[i];
-                Cavern current = caverns[connectedCavernIDs[i]-1];
-
-                Cavern toAdd = new Cavern { ID = id, Coordinates = current.Coordinates, Connectivity = current.Connectivity };
+                int id = connectedCavernIDs[i] - 1;
+                Cavern toAdd = caverns[id];
                 connected.Add(toAdd);
             }
-
             return connected;
         }
 
