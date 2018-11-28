@@ -115,7 +115,6 @@ namespace pathfinder
                 numOfCoordinateValues = numOfCaverns * 2;
                 numOfConnectivity = numOfCaverns * numOfCaverns;
             }
-            //Console.WriteLine("Caverns: " + numOfCaverns + " | Coordinates: " + numOfCoordinateValues / 2 + " | Connectivity: " + numOfConnectivity);
 
             // Get all of the cavern coordinates
             int id_counter = 1;
@@ -190,12 +189,10 @@ namespace pathfinder
 
                 foreach (Cavern cavern in connections)
                 {
-                    //Console.WriteLine(cavern.ID);
                     g = current.G + CalculateDistance(current.Coordinates, cavern.Coordinates);
                     // If the neighbour id is already on the closed list then ignore it
                     if (closedList.FirstOrDefault(cav => cav.ID == cavern.ID) != null)
                     {
-                        //Console.WriteLine("Already explored " + cavern.ID);
                         continue;
                     }
 
@@ -213,7 +210,7 @@ namespace pathfinder
                     else
                     {
                         // Check if using the current G score makes the cavern F score lower
-                        // If it is quicker then change the parent to current
+                        // If it is a quicker route, change the parent to current
                         if (g + cavern.H < cavern.F)
                         {
                             cavern.G = g;
@@ -228,8 +225,8 @@ namespace pathfinder
 
             if (found)
             {
-                Console.WriteLine("\nPASS");
                 // Follow the nodes backwards to display result
+                Console.WriteLine("\nPASS");
                 while (current != null)
                 {
                     output = current.ID + " " + output;
@@ -246,6 +243,7 @@ namespace pathfinder
             return output;
         }
 
+        // Get the actual cavern object for each cavern ID in the list
         public static List<Cavern> GetConnectedCaverns(List<int> connectedCavernIDs)
         {
             List<Cavern> connected = new List<Cavern>();
@@ -258,6 +256,7 @@ namespace pathfinder
             return connected;
         }
 
+        // Calculate the euclidean distance between two caverns
         public static double CalculateDistance(Tuple<int, int> one, Tuple<int, int> two)
         {
             return Math.Sqrt(Math.Pow((two.Item1 - one.Item1), 2) + Math.Pow((two.Item2 - one.Item2), 2));
